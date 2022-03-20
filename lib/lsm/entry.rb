@@ -2,7 +2,7 @@
 
 module LSM
   class Entry
-    attr_reader :key, :val
+    attr_accessor :key, :val
 
     def initialize(key, val)
       @key = key

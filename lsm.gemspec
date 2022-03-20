@@ -4,7 +4,7 @@ require_relative "lib/lsm/version"
 
 Gem::Specification.new do |spec|
   spec.name          = "lsm"
-  spec.version       = Lsm::VERSION
+  spec.version       = LSM::VERSION
   spec.authors       = ["Mike Yang"]
   spec.email         = ["yfractal@gmail.com"]
 

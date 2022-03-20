@@ -2,14 +2,25 @@
 
 module LSM
   class Level
-    def initialize(fanout, run_max_entries)
-      @fanout = fanout
-      @run_max_entries = run_max_entries
+    attr_accessor :runs
 
+    def initialize(fanout)
+      @fanout = fanout
       @runs = []
-      fanout.times do
-        Run.new(run_max_entries)
+    end
+
+    def insert_entries(entries)
+      run = Run.new(entries)
+      @runs = [run] + @runs
+    end
+
+    def get(key)
+      @runs.each do |run|
+        entry = run.get(key)
+        return entry if entry
       end
+
+      nil
     end
   end
 end

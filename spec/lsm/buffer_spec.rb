@@ -6,16 +6,15 @@ RSpec.describe LSM::Buffer do
 
     it 'one key' do
       buffer.put(1, '10')
-      entries = entries(buffer)
 
-      expect(entries.count).to eq 1
+      expect(buffer.entries.count).to eq 1
     end
 
     it 'two keys' do
       buffer.put(1, '10')
       buffer.put(3, '30')
 
-      entries = entries(buffer)
+      entries = buffer.entries
       expect(entries.count).to eq 2
       expect(entries[0].key).to eq 1
       expect(entries[1].key).to eq 3
@@ -26,7 +25,7 @@ RSpec.describe LSM::Buffer do
       buffer.put(3, '30')
       buffer.put(2, '30')
 
-      entries = entries(buffer)
+      entries = buffer.entries
       expect(entries.count).to eq 3
       expect(entries[0].key).to eq 1
       expect(entries[1].key).to eq 2
@@ -35,12 +34,12 @@ RSpec.describe LSM::Buffer do
 
     it 'update value' do
       buffer.put(1, '10')
-      entries = entries(buffer)
+      entries = buffer.entries
       expect(entries.count).to eq 1
       expect(entries[0].val).to eq '10'
 
       buffer.put(1, '20')
-      entries = entries(buffer)
+      entries = buffer.entries
       expect(entries.count).to eq 1
       expect(entries[0].val).to eq '20'
     end
@@ -61,9 +60,5 @@ RSpec.describe LSM::Buffer do
       entry = buffer.get(1)
       expect(entry).to eq nil
     end
-  end
-
-  def entries(buffer)
-    buffer.instance_variable_get("@entries")
   end
 end

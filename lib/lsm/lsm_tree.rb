@@ -2,9 +2,10 @@
 
 module LSM
   class LSMTree
-    def initialize(buffer_max_entries=5, run_max_entries=5, depth=5, fanout=5)
+    attr_reader :buffer, :levels
+
+    def initialize(buffer_max_entries=5, depth=5, fanout=5)
       @buffer_max_entries = buffer_max_entries
-      @run_max_entries = run_max_entries
       @depth = depth
       @fanout = fanout
 
@@ -12,14 +13,27 @@ module LSM
 
       @levels = []
       @depth.times do
-        @levels << Level.new(fanout, @run_max_entries)
+        @levels << Level.new(fanout)
       end
     end
 
-    def put(key, val)
+    def get(key)
+      entry = @buffer.get(key)
+      return entry if entry
+
+      level0 = @levels[0]
+      level0.get(key)
     end
 
-    def get(key)
+    def put(key, val)
+      return true if @buffer.put(key, val)
+
+      level0 = @levels[0]
+
+      level0.insert_entries(@buffer.entries)
+
+      @buffer.empty
+      @buffer.put(key, val)
     end
   end
 end

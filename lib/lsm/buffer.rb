@@ -2,6 +2,8 @@
 
 module LSM
   class Buffer
+    attr_reader :entries
+
     def initialize(max_size=10)
       @max_size = max_size
       @entries = []
@@ -25,11 +27,15 @@ module LSM
       if entry && entry.key == key
         @entries[index].val = val
       else
-        raise "Entry is full" if @entries.count >= @max_size
+        return false if @entries.count >= @max_size
 
         entry = Entry.new(key, val)
         @entries = @entries[0..index-1] + [entry] + @entries[index..]
       end
+    end
+
+    def empty
+      @entries = []
     end
 
     private

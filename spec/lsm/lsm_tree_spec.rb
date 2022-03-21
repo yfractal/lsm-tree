@@ -56,4 +56,70 @@ RSpec.describe LSM::LSMTree do
       expect(entry.val).to eq '10'
     end
   end
+
+  describe 'merge_entries_list' do
+    it 'case 1' do
+      list1 = [LSM::Entry.new(2, '100')]
+      list2 = [LSM::Entry.new(2, '10')]
+
+      tree = LSM::LSMTree.new
+      entries = tree.send(:merge_entries_list, [list1, list2])
+      expect(entries.count).to eq 1
+      expect(entries[0].val).to eq '100'
+    end
+
+    it 'case 2' do
+      list1 = [LSM::Entry.new(1, '10')]
+      list2 = [LSM::Entry.new(2, '20')]
+
+      tree = LSM::LSMTree.new
+      entries = tree.send(:merge_entries_list, [list1, list2])
+      expect(entries.count).to eq 2
+      expect(entries[0].val).to eq '10'
+    end
+
+    it 'case 3' do
+      list1 = [LSM::Entry.new(2, '20')]
+      list2 = [LSM::Entry.new(1, '10')]
+
+      tree = LSM::LSMTree.new
+      entries = tree.send(:merge_entries_list, [list1, list2])
+      expect(entries.count).to eq 2
+      expect(entries[0].val).to eq '10'
+    end
+
+    it 'merge 3 lists' do
+      list1 = [LSM::Entry.new(3, '30')]
+      list2 = [LSM::Entry.new(2, '20')]
+      list3 = [LSM::Entry.new(1, '10')]
+
+      tree = LSM::LSMTree.new
+      entries = tree.send(:merge_entries_list, [list1, list2, list3])
+      expect(entries.count).to eq 3
+      expect(entries[0].val).to eq '10'
+      expect(entries[1].val).to eq '20'
+      expect(entries[2].val).to eq '30'
+    end
+  end
+
+  describe 'merge_down' do
+    before do
+      @tree = LSM::LSMTree.new(2)
+
+      entries1 = [LSM::Entry.new(1, '10'), LSM::Entry.new(2, '200')]
+      entries2 = [LSM::Entry.new(1, '20')]
+      @tree.levels[0].insert_entries(entries1)
+      @tree.levels[0].insert_entries(entries2)
+      @tree.send(:merge_down, 0, 1)
+    end
+
+    it 'merge entries and insert to next levels' do
+      expect(@tree.levels[1].runs.count).to eq 1
+      expect(@tree.levels[1].runs[0].entries.count).to eq 2
+    end
+
+    it 'empty current level' do
+      expect(@tree.levels[0].runs.count).to eq 0
+    end
+  end
 end

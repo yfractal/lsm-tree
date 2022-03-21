@@ -14,6 +14,10 @@ module LSM
       @runs = [run] + @runs
     end
 
+    def insert_run(run)
+      @runs = [run] + @runs
+    end
+
     def get(key)
       @runs.each do |run|
         entry = run.get(key)
@@ -21,6 +25,14 @@ module LSM
       end
 
       nil
+    end
+
+    def empty
+      @runs = []
+    end
+
+    def full?
+      @runs.count == @fanout
     end
   end
 end

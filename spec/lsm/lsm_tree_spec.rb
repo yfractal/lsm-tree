@@ -122,4 +122,53 @@ RSpec.describe LSM::LSMTree do
       expect(@tree.levels[0].runs.count).to eq 0
     end
   end
+
+  describe 'random test' do
+    it '1 level data' do
+      tree = LSM::LSMTree.new(10, 1, 5)
+      array = (0..29).to_a.shuffle
+
+      array.each_with_index do |i, index|
+        tree.put(i, i)
+      end
+
+      array.each do |i|
+        expect(tree.get(i)&.val).to eq i
+      end
+    end
+
+    it '2 level data' do
+      tree = LSM::LSMTree.new(10, 2, 5)
+      array = (0...310).to_a.shuffle
+
+      array.each do |i|
+        tree.put(i, i)
+      end
+
+      array.each do |i|
+        expect(tree.get(i)&.val).to eq i
+      end
+    end
+
+    it 'handle duplicate' do
+      tree = LSM::LSMTree.new(10, 2, 5)
+      array = (0...100).to_a.shuffle
+
+      array.each do |i|
+        tree.put(i, i)
+      end
+
+      array.each do |i|
+        expect(tree.get(i)&.val).to eq i
+      end
+
+      array.each do |i|
+        tree.put(i, i * 10)
+      end
+
+      array.each do |i|
+        expect(tree.get(i)&.val).to eq i * 10
+      end
+    end
+  end
 end

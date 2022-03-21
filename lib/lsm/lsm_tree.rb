@@ -21,8 +21,12 @@ module LSM
       entry = @buffer.get(key)
       return entry if entry
 
-      level0 = @levels[0]
-      level0.get(key)
+      levels.each do |level|
+        entry = level.get(key)
+        return entry if entry
+      end
+
+      nil
     end
 
     def put(key, val)

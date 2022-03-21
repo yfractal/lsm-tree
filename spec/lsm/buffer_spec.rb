@@ -20,6 +20,12 @@ RSpec.describe LSM::Buffer do
       expect(entries[1].key).to eq 3
     end
 
+    it 'two keys 2' do
+      buffer.put(9, 9)
+      buffer.put(1, 1)
+      expect(buffer.entries.map(&:key)).to eq [1, 9]
+    end
+
     it 'three keys' do
       buffer.put(1, '10')
       buffer.put(3, '30')
@@ -59,6 +65,34 @@ RSpec.describe LSM::Buffer do
     it 'not exist' do
       entry = buffer.get(1)
       expect(entry).to eq nil
+    end
+  end
+
+  describe 'random data' do
+    let(:buffer) { LSM::Buffer.new 1000 }
+
+    it 'no duplidate' do
+      array = (0..999).to_a
+
+      array.shuffle.each do |i|
+        buffer.put(i, i)
+      end
+
+      expect(buffer.entries.map(&:key)).to eq (0..999).to_a
+    end
+
+    it 'with duplidate' do
+      array = (0..999).to_a
+
+      array.shuffle.each do |i|
+        buffer.put(i, i)
+      end
+
+      array.shuffle.each do |i|
+        buffer.put(i, i * 10)
+      end
+
+      expect(buffer.entries.map(&:val)).to eq (0..999).to_a.map { |i| i * 10 }
     end
   end
 end

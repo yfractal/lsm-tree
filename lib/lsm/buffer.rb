@@ -30,7 +30,7 @@ module LSM
         return false if @entries.count >= @max_size
 
         entry = Entry.new(key, val)
-        @entries = @entries[0..index-1] + [entry] + @entries[index..]
+        @entries = @entries[...index] + [entry] + @entries[index...]
       end
     end
 

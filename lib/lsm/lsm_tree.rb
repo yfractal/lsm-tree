@@ -42,6 +42,20 @@ module LSM
       @buffer.put(key, val)
     end
 
+    def to_s
+      table = []
+      table << ["LSMTree: buffer_length=#{@buffer_max_entries}, depth=#{@depth}, fanout=#{@fanout}"]
+
+      table << buffer.to_s + "\n"
+
+      levels.each_with_index do |level, i|
+        table << "Level: #{i}"
+        table << level.to_s + "\n"
+      end
+
+      table.join("\n")
+    end
+
     private
     def merge_down(from_level_index, to_level_index)
       from_level, to_level = levels[from_level_index], levels[to_level_index]

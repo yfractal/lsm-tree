@@ -38,6 +38,18 @@ module LSM
       @entries = []
     end
 
+    def to_s
+      table = []
+
+      table[0] = ["Buffer: count=#{entries.count}"]
+
+      @entries.each do |entry|
+        table << "key=#{entry.key}, val=#{entry.val}"
+      end
+
+      table.join "\n"
+    end
+
     private
     def find(key)
       binary_search(key, 0, @entries.count - 1)

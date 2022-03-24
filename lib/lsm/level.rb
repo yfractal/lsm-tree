@@ -10,7 +10,9 @@ module LSM
     end
 
     def insert_entries(entries)
-      run = Run.new(entries)
+      run = Run.new
+      run.entries = entries
+      run.save_to_file
       @runs = [run] + @runs
     end
 

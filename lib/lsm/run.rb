@@ -2,60 +2,55 @@
 
 module LSM
   class Run
-    attr_reader :entries, :file_name
-    # TODO: handle disk
+    attr_reader :file_name, :fences
+    attr_accessor :entries
 
-    def initialize(entries = [])
-      @entries = entries
-      @pagesize = `pagesize`.to_i
-      @file_name = `mktemp "/tmp/lsm-XXXXXX"`.split[0]
+    def initialize
+      @entries = []
+      @fences = []
+      @pagesize = Helper.system_pagesize
+      @file_name = Helper.mktemp("/tmp/lsm-XXXXXX")
     end
 
     def get(key)
-      index = find(key)
-      entry = @entries[index]
-
-      if entry && entry.key == key
-        entry
-      else
-        nil
-      end
+      fence = find(fences, :itself, key)
+      return nil if fence >= fences.length
+      find_in_file(key, fence * @pagesize)
     end
 
-    def <<(entry)
-      @entries << entry
+    def save_to_file
+      write_entries_to_file(@entries)
     end
 
     private
-    # TODO: remove duplicate code
-    def find(key)
-      binary_search(key, 0, @entries.count - 1)
-    end
+    def find_in_file(target_key, offset)
+      entries = read_from_file(offset)
 
-    def binary_search(key, s, e)
-      return s if s - e == 1
-
-      middle_index = (s + e) / 2
-      middle = @entries[middle_index]
-
-      if middle.key == key
-        middle_index
-      elsif middle.key < key
-        binary_search(key, middle_index + 1, e)
-      else
-        binary_search(key, s, middle_index - 1)
+      i = 0
+      while i < entries.length
+        # NOTICE: suppose all key is integer
+        key = entries[i].to_i
+        return Entry.new(key, entries[i+1]) if key == target_key
+        return nil if key >  target_key
+        i += 2
       end
+
+      nil
     end
 
-    private
+    def find(items, method, key)
+      Helper.binary_search(items, method, key, 0, items.count - 1)
+    end
+
     def write_entries_to_file(entries)
       size = 0
       next_page_size = @pagesize
       str = ""
-
+      @fences << entries[0].key
       entries.each_with_index do |entry, i|
         if size + entry.key.to_s.size + entry.val.to_s.size + 2 > next_page_size
           IO.write(@file_name, str, next_page_size - @pagesize)
+          @fences << entries[i].key
           str = ""
           next_page_size += @pagesize
         end

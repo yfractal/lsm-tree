@@ -39,4 +39,64 @@ RSpec.describe LSM::Run do
       expect(second_raw).to eq ["2", "2"]
     end
   end
+
+  describe 'fences' do
+    let(:run) { LSM::Run.new }
+
+    it 'set fences' do
+      run.instance_variable_set("@pagesize", 12)
+      entries = []
+
+      9.times do |i|
+        entries << LSM::Entry.new(i, i)
+      end
+
+      run.entries = entries
+      run.save_to_file
+
+      expect(run.fences).to eq [0, 3, 6]
+    end
+
+    it 'set fences' do
+      run.instance_variable_set("@pagesize", 8)
+      entries = []
+
+      5.times do |i|
+        entries << LSM::Entry.new(i, i)
+      end
+
+      run.entries = entries
+      run.save_to_file
+
+      expect(run.fences).to eq [0, 2, 4]
+    end
+
+    describe 'query through fences' do
+      before do
+        @run = LSM::Run.new
+        @run.instance_variable_set("@pagesize", 12)
+
+        entries = []
+
+        9.times do |i|
+          entries << LSM::Entry.new(i, i)
+        end
+
+        @run.entries = entries
+        @run.save_to_file
+      end
+
+      it 'happy path' do
+        expect(@run).to receive(:read_from_file).with(0).and_call_original
+        expect(@run.get(0).val).to eq "0"
+
+        expect(@run).to receive(:read_from_file).with(12).and_call_original
+        expect(@run.get(3).val).to eq "3"
+      end
+
+      it 'sad path' do
+        expect(@run.get(1024)).to eq nil
+      end
+    end
+  end
 end

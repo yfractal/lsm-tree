@@ -23,6 +23,19 @@ module LSM
       write_entries_to_file(@entries)
     end
 
+    # for presenting
+    def read_all_to_entries
+      raw = File.open(@file_name).read.split(/\n|,/)
+
+      i = 0
+      @entries = []
+
+      while i < raw.length
+        @entries << Entry.new(raw[i], raw[i+1])
+        i += 2
+      end
+    end
+
     private
     def find_in_file(target_key, offset)
       entries = read_from_file(offset)

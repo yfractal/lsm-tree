@@ -40,6 +40,7 @@ module LSM
     def to_s
       table = []
       table[0] = @runs.map do |run|
+        run.read_all_to_entries
         str = "Run: count=#{run.entries.count}"
         str + " " * (20 - str.length)
       end

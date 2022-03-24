@@ -129,11 +129,11 @@ RSpec.describe LSM::LSMTree do
       array = (0..29).to_a.shuffle
 
       array.each_with_index do |i, index|
-        tree.put(i, i)
+        tree.put(i, i.to_s)
       end
 
       array.each do |i|
-        expect(tree.get(i)&.val).to eq i
+        expect(tree.get(i)&.val).to eq i.to_s
       end
     end
 
@@ -142,11 +142,11 @@ RSpec.describe LSM::LSMTree do
       array = (0...310).to_a.shuffle
 
       array.each do |i|
-        tree.put(i, i)
+        tree.put(i, i.to_s)
       end
 
       array.each do |i|
-        expect(tree.get(i)&.val).to eq i
+        expect(tree.get(i)&.val).to eq i.to_s
       end
     end
 
@@ -155,19 +155,19 @@ RSpec.describe LSM::LSMTree do
       array = (0...100).to_a.shuffle
 
       array.each do |i|
-        tree.put(i, i)
+        tree.put(i, i.to_s)
       end
 
       array.each do |i|
-        expect(tree.get(i)&.val).to eq i
+        expect(tree.get(i)&.val).to eq i.to_s
       end
 
       array.each do |i|
-        tree.put(i, i * 10)
+        tree.put(i, (i * 10).to_s)
       end
 
       array.each do |i|
-        expect(tree.get(i)&.val).to eq i * 10
+        expect(tree.get(i)&.val).to eq (i * 10).to_s
       end
     end
   end

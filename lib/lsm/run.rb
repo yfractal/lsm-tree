@@ -14,7 +14,8 @@ module LSM
 
     def get(key)
       fence = find(fences, :itself, key)
-      return nil if fence >= fences.length
+      fence = [fence, fences.length - 1].min
+
       find_in_file(key, fence * @pagesize)
     end
 

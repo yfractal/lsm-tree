@@ -39,6 +39,10 @@ module LSM
       end
     end
 
+    def empty
+      File.delete(@file_name)
+    end
+
     private
     def find_in_file(target_key, offset)
       entries = read_from_file(offset)

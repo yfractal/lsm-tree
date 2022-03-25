@@ -30,6 +30,7 @@ module LSM
     end
 
     def empty
+      @runs.each &:empty
       @runs = []
     end
 

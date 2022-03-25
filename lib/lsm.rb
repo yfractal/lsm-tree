@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 require_relative "lsm/version"
+require_relative "lsm/bloom_filter"
 require_relative "lsm/entry"
 require_relative "lsm/run"
 require_relative "lsm/level"

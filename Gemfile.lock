@@ -2,10 +2,12 @@ PATH
   remote: .
   specs:
     lsm (0.1.0)
+      bitarray (~> 1.2.0)
 
 GEM
   remote: https://rubygems.org/
   specs:
+    bitarray (1.2.0)
     byebug (11.1.3)
     diff-lcs (1.5.0)
     rake (13.0.6)

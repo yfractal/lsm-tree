@@ -10,9 +10,12 @@ module LSM
       @fences = []
       @pagesize = Helper.system_pagesize
       @file_name = Helper.mktemp("/tmp/lsm-XXXXXX")
+      @bloom_filter = BloomFilter.new(10000)
     end
 
     def get(key)
+      return nil if !@bloom_filter.has?(key)
+
       fence = find(fences, :itself, key)
       fence = [fence, fences.length - 1].min
 
@@ -62,6 +65,8 @@ module LSM
       str = ""
       @fences << entries[0].key
       entries.each_with_index do |entry, i|
+        @bloom_filter.set(entry.key)
+
         if size + entry.key.to_s.size + entry.val.to_s.size + 2 > next_page_size
           IO.write(@file_name, str, next_page_size - @pagesize)
           @fences << entries[i].key

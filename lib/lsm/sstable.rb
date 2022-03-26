@@ -28,7 +28,7 @@ module LSM
 
     # for presenting
     def read_all_to_entries
-      raw = File.open(@file_name).read.split(/\n|,/)
+      raw = File.open(@file_name).read.gsub(" ", "").split(/\n|,/)
 
       i = 0
       @entries = []
@@ -37,6 +37,8 @@ module LSM
         @entries << Entry.new(raw[i], raw[i+1])
         i += 2
       end
+
+      @entries
     end
 
     def empty
@@ -44,7 +46,7 @@ module LSM
     end
 
     def read_from_file(offset)
-      IO.read(@file_name, @pagesize, offset * @pagesize).split(/\n|,/)
+      IO.read(@file_name, @pagesize, offset * @pagesize).gsub(" ", "").split(/\n|,| /)
     end
 
     private
@@ -68,21 +70,20 @@ module LSM
     end
 
     def write_entries_to_file(entries)
-      size = 0
       next_page_size = @pagesize
       str = ""
       @fences << entries[0].key
       entries.each_with_index do |entry, i|
         @bloom_filter.set(entry.key)
 
-        if size + entry.key.to_s.size + entry.val.to_s.size + 2 > next_page_size
-          IO.write(@file_name, str, next_page_size - @pagesize)
+        if str.size + entry.key.to_s.size + entry.val.to_s.size + 2 > @pagesize
+          padding = " " * (next_page_size - str.length)
+          IO.write(@file_name, str + padding, next_page_size - @pagesize)
           @fences << entries[i].key
           str = ""
           next_page_size += @pagesize
         end
 
-        size += entry.key.to_s.size + entry.val.to_s.size + 2
         str += entry.key.to_s + "," + entry.val.to_s + "\n"
       end
 

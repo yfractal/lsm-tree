@@ -38,6 +38,22 @@ RSpec.describe LSM::SSTable do
       second_raw = sstable.send(:read_from_file, 1)
       expect(second_raw).to eq ["2", "2"]
     end
+
+    it 'more test' do
+      expect(LSM::Helper).to receive(:system_pagesize).and_return(10)
+      entries = (0..5).map { |i| LSM::Entry.new(i, i)}
+      sstable.send(:write_entries_to_file, entries)
+      entries = sstable.read_all_to_entries
+      expect(entries.map(&:val)).to eq (0..5).to_a.map { |i| i.to_s }
+    end
+
+    it 'more test' do
+      expect(LSM::Helper).to receive(:system_pagesize).and_return(8)
+      entries = (0..99).map { |i| LSM::Entry.new(i, i)}
+      sstable.send(:write_entries_to_file, entries)
+      entries = sstable.read_all_to_entries
+      expect(entries.map(&:val)).to eq (0..99).to_a.map { |i| i.to_s }
+    end
   end
 
   describe 'fences' do

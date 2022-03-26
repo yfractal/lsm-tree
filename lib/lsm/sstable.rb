@@ -43,6 +43,10 @@ module LSM
       File.delete(@file_name)
     end
 
+    def read_from_file(offset)
+      IO.read(@file_name, @pagesize, offset).split(/\n|,/)
+    end
+
     private
     def find_in_file(target_key, offset)
       entries = read_from_file(offset)
@@ -85,10 +89,6 @@ module LSM
       if str != ""
         IO.write(@file_name, str, next_page_size - @pagesize)
       end
-    end
-
-    def read_from_file(offset)
-      IO.read(@file_name, @pagesize, offset).split(/\n|,/)
     end
   end
 end

@@ -4,7 +4,7 @@ module LSM
       @sstable = sstable
       @fence_index = 0
       @entries_index = 0
-      @current_entries = @sstable.read_from_file(0)
+      @current_entries = read_from_file(@fence_index)
     end
 
     def current_entry
@@ -22,10 +22,17 @@ module LSM
         @fence_index += 1
 
         if @fence_index < @sstable.fences.length
-          @current_entries = @sstable.read_from_file(@fence_index)
+          @current_entries = read_from_file(@fence_index)
           @entries_index = 0
         end
       end
+    end
+
+    private
+    def read_from_file(fence_index)
+      return [] if fence_index >= @sstable.fences.length
+
+      @sstable.read_from_file(fence_index)
     end
   end
 end

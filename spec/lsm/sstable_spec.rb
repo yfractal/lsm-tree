@@ -35,7 +35,7 @@ RSpec.describe LSM::SSTable do
       first_raw = sstable.send(:read_from_file, 0)
       expect(first_raw).to eq ["1"] * (`pagesize`.to_i / 4) * 2
 
-      second_raw = sstable.send(:read_from_file, `pagesize`.to_i)
+      second_raw = sstable.send(:read_from_file, 1)
       expect(second_raw).to eq ["2", "2"]
     end
   end
@@ -90,7 +90,7 @@ RSpec.describe LSM::SSTable do
         expect(@sstable).to receive(:read_from_file).with(0).and_call_original
         expect(@sstable.get(0).val).to eq "0"
 
-        expect(@sstable).to receive(:read_from_file).with(12).and_call_original
+        expect(@sstable).to receive(:read_from_file).with(1).and_call_original
         expect(@sstable.get(3).val).to eq "3"
       end
 

@@ -16,10 +16,10 @@ module LSM
     def get(key)
       return nil if !@bloom_filter.has?(key)
 
-      fence = find(fences, :itself, key)
-      fence = [fence, fences.length - 1].min
+      fence_index = find(fences, :itself, key)
+      fence_index = [fence_index, fences.length - 1].min
 
-      find_in_file(key, fence * @pagesize)
+      find_in_file(key, fence_index)
     end
 
     def save_to_file
@@ -44,7 +44,7 @@ module LSM
     end
 
     def read_from_file(offset)
-      IO.read(@file_name, @pagesize, offset).split(/\n|,/)
+      IO.read(@file_name, @pagesize, offset * @pagesize).split(/\n|,/)
     end
 
     private

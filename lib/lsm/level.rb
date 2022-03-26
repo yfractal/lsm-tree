@@ -46,7 +46,7 @@ module LSM
         str + " " * (20 - str.length)
       end
 
-      i = 1
+      i = 0
       while true
         has_entrie = false
         table[i] = []
@@ -57,7 +57,7 @@ module LSM
             has_entrie = true
             str = "key=#{entry.key}, val=#{entry.val}"
 
-            table[i] << str + " " * (20 - str.length)
+            table[i] << str + " " * (40 - str.length)
           else
             table[i] << ""
           end

@@ -2,27 +2,27 @@
 
 module LSM
   class Level
-    attr_accessor :runs
+    attr_accessor :sstables
 
     def initialize(fanout)
       @fanout = fanout
-      @runs = []
+      @sstables = []
     end
 
     def insert_entries(entries)
-      run = Run.new
-      run.entries = entries
-      run.save_to_file
-      @runs = [run] + @runs
+      sstable = SSTable.new
+      sstable.entries = entries
+      sstable.save_to_file
+      @sstables = [sstable] + @sstables
     end
 
-    def insert_run(run)
-      @runs = [run] + @runs
+    def insert_sstable(sstable)
+      @sstables = [sstable] + @sstables
     end
 
     def get(key)
-      @runs.each do |run|
-        entry = run.get(key)
+      @sstables.each do |sstable|
+        entry = sstable.get(key)
         return entry if entry
       end
 
@@ -30,19 +30,19 @@ module LSM
     end
 
     def empty
-      @runs.each &:empty
-      @runs = []
+      @sstables.each &:empty
+      @sstables = []
     end
 
     def full?
-      @runs.count == @fanout
+      @sstables.count == @fanout
     end
 
     def to_s
       table = []
-      table[0] = @runs.map do |run|
-        run.read_all_to_entries
-        str = "Run: count=#{run.entries.count}"
+      table[0] = @sstables.map do |sstable|
+        sstable.read_all_to_entries
+        str = "sstable: count=#{sstable.entries.count}"
         str + " " * (20 - str.length)
       end
 
@@ -50,8 +50,8 @@ module LSM
       while true
         has_entrie = false
         table[i] = []
-        @runs.each do |run|
-          entry = run.entries[i]
+        @sstables.each do |sstable|
+          entry = sstable.entries[i]
 
           if entry != nil
             has_entrie = true

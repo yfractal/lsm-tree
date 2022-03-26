@@ -62,7 +62,7 @@ module LSM
 
       merge_down(to_level_index, to_level_index + 1) if to_level.full?
 
-      entries = merge_entries_list(from_level.runs.map { |run| run.entries})
+      entries = merge_entries_list(from_level.sstables.map { |sstable| sstable.entries})
 
       to_level.insert_entries(entries)
 

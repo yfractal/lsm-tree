@@ -3,7 +3,7 @@
 require_relative "lsm/version"
 require_relative "lsm/bloom_filter"
 require_relative "lsm/entry"
-require_relative "lsm/run"
+require_relative "lsm/sstable"
 require_relative "lsm/level"
 require_relative "lsm/mem_table"
 require_relative "lsm/lsm_tree"

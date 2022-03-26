@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 module LSM
-  class Run
+  class SSTable
     attr_reader :file_name, :fences
     attr_accessor :entries
 

@@ -21,9 +21,9 @@ RSpec.describe LSM::LSMTree do
       # mem_table is full
       expect(tree.mem_table.entries.count).to eq 1
 
-      tree.levels[0].runs
-      expect(tree.levels[0].runs.count).to eq 1
-      expect(tree.levels[0].runs[0].entries.count).to eq 2
+      tree.levels[0].sstables
+      expect(tree.levels[0].sstables.count).to eq 1
+      expect(tree.levels[0].sstables[0].entries.count).to eq 2
     end
   end
 
@@ -49,7 +49,7 @@ RSpec.describe LSM::LSMTree do
       tree.put(3, '30')
 
       level0 = tree.levels[0]
-      expect(level0.runs.count).to eq 1
+      expect(level0.sstables.count).to eq 1
 
       entry = tree.get(1)
       expect(entry.key).to eq 1
@@ -114,12 +114,12 @@ RSpec.describe LSM::LSMTree do
     end
 
     it 'merge entries and insert to next levels' do
-      expect(@tree.levels[1].runs.count).to eq 1
-      expect(@tree.levels[1].runs[0].entries.count).to eq 2
+      expect(@tree.levels[1].sstables.count).to eq 1
+      expect(@tree.levels[1].sstables[0].entries.count).to eq 2
     end
 
     it 'empty current level' do
-      expect(@tree.levels[0].runs.count).to eq 0
+      expect(@tree.levels[0].sstables.count).to eq 0
     end
   end
 

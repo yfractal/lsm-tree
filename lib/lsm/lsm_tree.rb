@@ -4,7 +4,7 @@ module LSM
   class LSMTree
     attr_reader :mem_table, :levels
 
-    def initialize(mem_table_max_entries=5, depth=5, fanout=5)
+    def initialize(mem_table_max_entries=5, depth=5, fanout=2)
       @mem_table_max_entries = mem_table_max_entries
       @depth = depth
       @fanout = fanout

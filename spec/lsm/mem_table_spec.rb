@@ -1,37 +1,37 @@
 # frozen_string_literal: true
 
-RSpec.describe LSM::Buffer do
+RSpec.describe LSM::MemTable do
   describe 'put' do
-    let(:buffer) { LSM::Buffer.new }
+    let(:mem_table) { LSM::MemTable.new }
 
     it 'one key' do
-      buffer.put(1, '10')
+      mem_table.put(1, '10')
 
-      expect(buffer.entries.count).to eq 1
+      expect(mem_table.entries.count).to eq 1
     end
 
     it 'two keys' do
-      buffer.put(1, '10')
-      buffer.put(3, '30')
+      mem_table.put(1, '10')
+      mem_table.put(3, '30')
 
-      entries = buffer.entries
+      entries = mem_table.entries
       expect(entries.count).to eq 2
       expect(entries[0].key).to eq 1
       expect(entries[1].key).to eq 3
     end
 
     it 'two keys 2' do
-      buffer.put(9, 9)
-      buffer.put(1, 1)
-      expect(buffer.entries.map(&:key)).to eq [1, 9]
+      mem_table.put(9, 9)
+      mem_table.put(1, 1)
+      expect(mem_table.entries.map(&:key)).to eq [1, 9]
     end
 
     it 'three keys' do
-      buffer.put(1, '10')
-      buffer.put(3, '30')
-      buffer.put(2, '30')
+      mem_table.put(1, '10')
+      mem_table.put(3, '30')
+      mem_table.put(2, '30')
 
-      entries = buffer.entries
+      entries = mem_table.entries
       expect(entries.count).to eq 3
       expect(entries[0].key).to eq 1
       expect(entries[1].key).to eq 2
@@ -39,60 +39,60 @@ RSpec.describe LSM::Buffer do
     end
 
     it 'update value' do
-      buffer.put(1, '10')
-      entries = buffer.entries
+      mem_table.put(1, '10')
+      entries = mem_table.entries
       expect(entries.count).to eq 1
       expect(entries[0].val).to eq '10'
 
-      buffer.put(1, '20')
-      entries = buffer.entries
+      mem_table.put(1, '20')
+      entries = mem_table.entries
       expect(entries.count).to eq 1
       expect(entries[0].val).to eq '20'
     end
   end
 
   describe 'get' do
-    let(:buffer) { LSM::Buffer.new }
+    let(:mem_table) { LSM::MemTable.new }
 
     it 'exist' do
-      buffer.put(1, '10')
-      entry = buffer.get(1)
+      mem_table.put(1, '10')
+      entry = mem_table.get(1)
 
       expect(entry.key).to eq 1
       expect(entry.val).to eq '10'
     end
 
     it 'not exist' do
-      entry = buffer.get(1)
+      entry = mem_table.get(1)
       expect(entry).to eq nil
     end
   end
 
   describe 'random data' do
-    let(:buffer) { LSM::Buffer.new 1000 }
+    let(:mem_table) { LSM::MemTable.new 1000 }
 
     it 'no duplidate' do
       array = (0..999).to_a
 
       array.shuffle.each do |i|
-        buffer.put(i, i)
+        mem_table.put(i, i)
       end
 
-      expect(buffer.entries.map(&:key)).to eq (0..999).to_a
+      expect(mem_table.entries.map(&:key)).to eq (0..999).to_a
     end
 
     it 'with duplidate' do
       array = (0..999).to_a
 
       array.shuffle.each do |i|
-        buffer.put(i, i)
+        mem_table.put(i, i)
       end
 
       array.shuffle.each do |i|
-        buffer.put(i, i * 10)
+        mem_table.put(i, i * 10)
       end
 
-      expect(buffer.entries.map(&:val)).to eq (0..999).to_a.map { |i| i * 10 }
+      expect(mem_table.entries.map(&:val)).to eq (0..999).to_a.map { |i| i * 10 }
     end
   end
 end

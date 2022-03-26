@@ -2,14 +2,14 @@
 
 module LSM
   class LSMTree
-    attr_reader :buffer, :levels
+    attr_reader :mem_table, :levels
 
-    def initialize(buffer_max_entries=5, depth=5, fanout=5)
-      @buffer_max_entries = buffer_max_entries
+    def initialize(mem_table_max_entries=5, depth=5, fanout=5)
+      @mem_table_max_entries = mem_table_max_entries
       @depth = depth
       @fanout = fanout
 
-      @buffer = Buffer.new(@buffer_max_entries)
+      @mem_table = MemTable.new(@mem_table_max_entries)
 
       @levels = []
       @depth.times do
@@ -18,7 +18,7 @@ module LSM
     end
 
     def get(key)
-      entry = @buffer.get(key)
+      entry = @mem_table.get(key)
       return entry if entry
 
       levels.each do |level|
@@ -30,23 +30,23 @@ module LSM
     end
 
     def put(key, val)
-      return true if @buffer.put(key, val)
+      return true if @mem_table.put(key, val)
 
       level0 = @levels[0]
 
       merge_down(0, 1) if level0.full?
 
-      level0.insert_entries(@buffer.entries)
+      level0.insert_entries(@mem_table.entries)
 
-      @buffer.empty
-      @buffer.put(key, val)
+      @mem_table.empty
+      @mem_table.put(key, val)
     end
 
     def to_s
       table = []
-      table << ["LSMTree: buffer_length=#{@buffer_max_entries}, depth=#{@depth}, fanout=#{@fanout}"]
+      table << ["LSMTree: mem_table_length=#{@mem_table_max_entries}, depth=#{@depth}, fanout=#{@fanout}"]
 
-      table << buffer.to_s + "\n"
+      table << mem_table.to_s + "\n"
 
       levels.each_with_index do |level, i|
         table << "Level: #{i}"

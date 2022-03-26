@@ -4,22 +4,22 @@ RSpec.describe LSM::LSMTree do
   describe 'put' do
     let(:tree) { LSM::LSMTree.new(2) }
 
-    it 'put in buffer' do
+    it 'put in mem_table' do
       tree.put(1, '10')
 
-      buffer = tree.buffer
-      expect(buffer.entries.count).to eq 1
+      mem_table = tree.mem_table
+      expect(mem_table.entries.count).to eq 1
     end
 
-    it 'when buffer is full, put entries in level0' do
+    it 'when mem_table is full, put entries in level0' do
       tree.put(1, '10')
       tree.put(2, '20')
 
-      expect(tree.buffer.entries.count).to eq 2
+      expect(tree.mem_table.entries.count).to eq 2
 
       tree.put(3, '30')
-      # buffer is full
-      expect(tree.buffer.entries.count).to eq 1
+      # mem_table is full
+      expect(tree.mem_table.entries.count).to eq 1
 
       tree.levels[0].runs
       expect(tree.levels[0].runs.count).to eq 1
@@ -36,7 +36,7 @@ RSpec.describe LSM::LSMTree do
       expect(entry).to eq nil
     end
 
-    it 'in buffer' do
+    it 'in mem_table' do
       tree.put(1, '10')
       entry = tree.get(1)
       expect(entry.key).to eq 1

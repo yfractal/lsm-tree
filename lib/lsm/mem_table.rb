@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 module LSM
-  class Buffer
+  class MemTable
     attr_reader :entries
 
     def initialize(max_size=10)
@@ -41,7 +41,7 @@ module LSM
     def to_s
       table = []
 
-      table[0] = ["Buffer: count=#{entries.count}"]
+      table[0] = ["MemTable: count=#{entries.count}"]
 
       @entries.each do |entry|
         table << "key=#{entry.key}, val=#{entry.val}"

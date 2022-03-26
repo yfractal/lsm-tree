@@ -281,6 +281,8 @@ RSpec.describe LSM::LSMTree do
 
   describe 'random test' do
     it '1 level data' do
+      expect(LSM::Helper).to receive(:system_pagesize).and_return(10).at_least(1).times
+
       tree = LSM::LSMTree.new(10, 1, 5)
       array = (0..29).to_a.shuffle
 
@@ -294,6 +296,7 @@ RSpec.describe LSM::LSMTree do
     end
 
     it '2 level data' do
+      expect(LSM::Helper).to receive(:system_pagesize).and_return(13).at_least(1).times
       tree = LSM::LSMTree.new(10, 2, 5)
       array = (0...310).to_a.shuffle
 
@@ -307,6 +310,7 @@ RSpec.describe LSM::LSMTree do
     end
 
     it 'handle duplicate' do
+      expect(LSM::Helper).to receive(:system_pagesize).and_return(15).at_least(1).times
       tree = LSM::LSMTree.new(10, 2, 5)
       array = (0...100).to_a.shuffle
 

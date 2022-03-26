@@ -42,14 +42,14 @@ module LSM
       table = []
       table[0] = @sstables.map do |sstable|
         sstable.read_all_to_entries
-        str = "sstable: count=#{sstable.entries.count}"
-        str + " " * (20 - str.length)
+        str = "SSTable(on disk): entries count=#{sstable.entries.count}"
+        str + " " * (40 - str.length)
       end
 
       i = 0
       while true
         has_entrie = false
-        table[i] = []
+        table[i+1] = []
         @sstables.each do |sstable|
           entry = sstable.entries[i]
 
@@ -57,9 +57,7 @@ module LSM
             has_entrie = true
             str = "key=#{entry.key}, val=#{entry.val}"
 
-            table[i] << str + " " * (40 - str.length)
-          else
-            table[i] << ""
+            table[i+1] << str + " " * (40 - str.length)
           end
         end
 

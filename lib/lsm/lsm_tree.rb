@@ -2,7 +2,7 @@
 
 module LSM
   class LSMTree
-    attr_reader :mem_table, :levels
+    attr_reader :mem_table, :levels, :mem_table_max_entries, :depth, :fanout
 
     def initialize(mem_table_max_entries=5, depth=5, fanout=2)
       @mem_table_max_entries = mem_table_max_entries
@@ -44,13 +44,14 @@ module LSM
 
     def to_s
       table = []
-      table << ["LSMTree: mem_table_length=#{@mem_table_max_entries}, depth=#{@depth}, fanout=#{@fanout}"]
 
-      table << mem_table.to_s + "\n"
+      table << mem_table.to_s
 
       levels.each_with_index do |level, i|
-        table << "Level: #{i}"
-        table << level.to_s + "\n"
+        next if level.sstables.length == 0
+
+        table << "Level-#{i}:"
+        table << level.to_s
       end
 
       table.join("\n")

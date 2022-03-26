@@ -41,7 +41,7 @@ module LSM
     def to_s
       table = []
 
-      table[0] = ["MemTable: count=#{entries.count}"]
+      table[0] = ["MemTable(in memory): entries count=#{entries.length}"]
 
       @entries.each do |entry|
         table << "key=#{entry.key}, val=#{entry.val}"

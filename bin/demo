@@ -1,0 +1,50 @@
+#!/usr/bin/env ruby
+# frozen_string_literal: true
+
+require 'bundler/setup'
+require 'lsm'
+require 'byebug'
+require 'ffaker'
+require 'colorize'
+
+tree = LSM::LSMTree.new(3)
+
+puts "\nAn empty LSMTree looks like:".colorize(:light_green)
+
+puts "LSMTree: mem_table_length=#{tree.mem_table_max_entries}, depth(level)=#{tree.depth}, fanout=#{tree.fanout}".colorize(:cyan)
+
+puts tree.to_s.colorize(:cyan)
+
+puts "\nAfter inserted one entry".colorize(:light_green)
+
+tree.put(rand(1000), FFaker::Address.city.gsub(" ", ""))
+
+puts tree.to_s.colorize(:cyan)
+
+puts "\nAfter we inserted 2 more entries, the mmtable is full".colorize(:light_green)
+
+2.times do
+  tree.put(rand(1000), FFaker::Address.city.gsub(" ", ""))
+end
+
+puts tree.to_s.colorize(:cyan)
+
+puts "\nAfter we inserted one more entry, mmtable will be wrote to level-0".colorize(:light_green)
+
+tree.put(rand(1000), FFaker::Address.city.gsub(" ", ""))
+
+puts tree.to_s.colorize(:cyan)
+
+puts "After we add more entries, level 0 is full now".colorize(:light_green)
+
+5.times do
+  tree.put(rand(1000), FFaker::Address.city.gsub(" ", ""))
+end
+
+puts tree.to_s.colorize(:cyan)
+
+puts "Merge level-0 into level-1".colorize(:light_green)
+
+tree.put(rand(1000), FFaker::Address.city.gsub(" ", ""))
+
+puts tree.to_s.colorize(:cyan)

@@ -28,7 +28,7 @@ module LSM
 
     # for presenting
     def read_all_to_entries
-      raw = File.open(@file_name).read.gsub(" ", "").split(/\n|,/)
+      raw = File.open(@file_name).read.gsub("*", "").split(/\n|,/)
 
       i = 0
       @entries = []
@@ -46,7 +46,7 @@ module LSM
     end
 
     def read_from_file(offset)
-      IO.read(@file_name, @pagesize, offset * @pagesize).gsub(" ", "").split(/\n|,| /)
+      IO.read(@file_name, @pagesize, offset * @pagesize).gsub("*", "").split(/\n|,| /)
     end
 
     private
@@ -77,7 +77,7 @@ module LSM
         @bloom_filter.set(entry.key)
 
         if str.size + entry.key.to_s.size + entry.val.to_s.size + 2 > @pagesize
-          padding = " " * (next_page_size - str.length)
+          padding = "*" * (next_page_size - str.length)
           IO.write(@file_name, str + padding, next_page_size - @pagesize)
           @fences << entries[i].key
           str = ""

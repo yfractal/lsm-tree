@@ -9,7 +9,9 @@ GEM
   specs:
     bitarray (1.2.0)
     byebug (11.1.3)
+    colorize (0.8.1)
     diff-lcs (1.5.0)
+    ffaker (2.20.0)
     rake (13.0.6)
     rspec (3.11.0)
       rspec-core (~> 3.11.0)
@@ -30,6 +32,8 @@ PLATFORMS
 
 DEPENDENCIES
   byebug
+  colorize
+  ffaker
   lsm!
   rake (~> 13.0)
   rspec (~> 3.0)

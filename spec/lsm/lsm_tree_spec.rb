@@ -57,48 +57,204 @@ RSpec.describe LSM::LSMTree do
     end
   end
 
-  describe 'merge_entries_list' do
-    it 'case 1' do
-      list1 = [LSM::Entry.new(2, '100')]
-      list2 = [LSM::Entry.new(2, '10')]
+  describe 'merge_sstables_helper' do
+    let(:tree) { LSM::LSMTree.new }
 
-      tree = LSM::LSMTree.new
-      entries = tree.send(:merge_entries_list, [list1, list2])
-      expect(entries.count).to eq 1
-      expect(entries[0].val).to eq '100'
+    it 'no more entries' do
+      sstable = LSM::SSTable.new
+      iterator = LSM::SSTableEntriesIterator.new(sstable)
+
+      _, entries = tree.send(:merge_sstables_helper, [iterator], [])
+      expect(entries).to eq []
     end
 
-    it 'case 2' do
-      list1 = [LSM::Entry.new(1, '10')]
-      list2 = [LSM::Entry.new(2, '20')]
+    it 'one iterator in queue' do
+      sstable = LSM::SSTable.new
+      3.times do |i|
+        sstable.entries << LSM::Entry.new(i, i)
+      end
+      sstable.save_to_file
+      iterator = LSM::SSTableEntriesIterator.new(sstable)
 
-      tree = LSM::LSMTree.new
-      entries = tree.send(:merge_entries_list, [list1, list2])
-      expect(entries.count).to eq 2
-      expect(entries[0].val).to eq '10'
+      _, entries = tree.send(:merge_sstables_helper, [iterator], [])
+      expect(entries.count).to eq 3
+      expect(entries.map(&:key)).to eq [0, 1, 2]
+    end
+
+    it 'first iterator in queue has no element' do
+      sstable = LSM::SSTable.new
+      3.times do |i|
+        sstable.entries << LSM::Entry.new(i, i)
+      end
+      sstable.save_to_file
+      iterator = LSM::SSTableEntriesIterator.new(sstable)
+
+      sstable1 = LSM::SSTable.new
+      iterator1 = LSM::SSTableEntriesIterator.new(sstable1)
+
+      _, entries = tree.send(:merge_sstables_helper, [iterator1, iterator], [])
+
+      expect(entries.map(&:key)).to eq [0]
+      expect(iterator.current_entry.key).to eq 1
+    end
+
+    describe 'merge one entry' do
+      it 'same key' do
+        sstable = LSM::SSTable.new
+        sstable.entries << LSM::Entry.new(1, "10")
+        sstable.save_to_file
+
+        iterator = LSM::SSTableEntriesIterator.new(sstable)
+
+        sstable1 = LSM::SSTable.new
+        sstable1.entries << LSM::Entry.new(1, "1")
+        sstable1.save_to_file
+        iterator1 = LSM::SSTableEntriesIterator.new(sstable1)
+
+        _, entries = tree.send(:merge_sstables_helper, [iterator, iterator1], [])
+
+        expect(entries[0].val).to eq "10"
+
+        expect(iterator.current_entry).to eq nil
+        expect(iterator1.current_entry).to eq nil
+      end
+
+      it 'small key' do
+        sstable = LSM::SSTable.new
+        sstable.entries << LSM::Entry.new(1, "10")
+        sstable.save_to_file
+
+        iterator = LSM::SSTableEntriesIterator.new(sstable)
+
+        sstable1 = LSM::SSTable.new
+        sstable1.entries << LSM::Entry.new(2, "20")
+        sstable1.save_to_file
+        iterator1 = LSM::SSTableEntriesIterator.new(sstable1)
+
+        _, entries = tree.send(:merge_sstables_helper, [iterator, iterator1], [])
+
+        expect(entries[0].val).to eq "10"
+
+        expect(iterator.current_entry).to eq nil
+        expect(iterator1.current_entry).not_to eq nil
+      end
+
+      it 'has bigger key' do
+        sstable = LSM::SSTable.new
+        sstable.entries << LSM::Entry.new(2, "20")
+        sstable.save_to_file
+
+        iterator = LSM::SSTableEntriesIterator.new(sstable)
+
+        sstable1 = LSM::SSTable.new
+        sstable1.entries << LSM::Entry.new(1, "10")
+        sstable1.save_to_file
+        iterator1 = LSM::SSTableEntriesIterator.new(sstable1)
+
+        _, entries = tree.send(:merge_sstables_helper, [iterator, iterator1], [])
+
+        expect(entries.count).to eq 1
+
+        expect(iterator.current_entry).not_to eq nil
+        expect(iterator1.current_entry).to eq nil
+      end
+    end
+  end
+
+  describe 'merge_sstables' do
+    let(:tree) { LSM::LSMTree.new }
+
+    describe 'merge 2 sstabels' do
+      it 'case 1' do
+        sstable = LSM::SSTable.new
+        sstable.entries << LSM::Entry.new(2, "20")
+        sstable.save_to_file
+
+        sstable1 = LSM::SSTable.new
+        sstable1.entries << LSM::Entry.new(1, "10")
+        sstable1.save_to_file
+
+        level = LSM::Level.new(2)
+        level.sstables = [sstable, sstable1]
+
+        entries = tree.send(:merge_sstables, level)
+
+        expect(entries.count).to eq 2
+        expect(entries.map(&:key)).to eq [1, 2]
+        expect(entries.map(&:val)).to eq ["10", "20"]
+      end
+
+      it 'case 2' do
+        sstable = LSM::SSTable.new
+        sstable.entries << LSM::Entry.new(1, "10")
+        sstable.save_to_file
+
+        sstable1 = LSM::SSTable.new
+        sstable1.entries << LSM::Entry.new(1, "1")
+        sstable1.save_to_file
+
+        level = LSM::Level.new(2)
+        level.sstables = [sstable, sstable1]
+
+        entries = tree.send(:merge_sstables, level)
+
+        expect(entries.count).to eq 1
+        expect(entries.map(&:key)).to eq [1]
+        expect(entries.map(&:val)).to eq ["10"]
+      end
     end
 
     it 'case 3' do
-      list1 = [LSM::Entry.new(2, '20')]
-      list2 = [LSM::Entry.new(1, '10')]
+      sstable = LSM::SSTable.new
+      sstable.entries << LSM::Entry.new(3, "3")
+      sstable.entries << LSM::Entry.new(7, "7")
+      sstable.entries << LSM::Entry.new(8, "8")
+      # sstable.instance_variable_set("@pagesize", 8)
+      sstable.save_to_file
+      # expect(sstable.fences.count).to eq 2
 
-      tree = LSM::LSMTree.new
-      entries = tree.send(:merge_entries_list, [list1, list2])
-      expect(entries.count).to eq 2
-      expect(entries[0].val).to eq '10'
+      sstable1 = LSM::SSTable.new
+      sstable1.entries << LSM::Entry.new(1, "10")
+      sstable1.entries << LSM::Entry.new(5, "50")
+      sstable1.entries << LSM::Entry.new(6, "60")
+      sstable1.entries << LSM::Entry.new(7, "70")
+      sstable1.entries << LSM::Entry.new(9, "90")
+      sstable1.save_to_file
+
+      sstable2 = LSM::SSTable.new
+      sstable2.entries << LSM::Entry.new(1, "200")
+      sstable2.entries << LSM::Entry.new(2, "200")
+      sstable2.entries << LSM::Entry.new(4, "400")
+      sstable2.entries << LSM::Entry.new(9, "900")
+      sstable2.save_to_file
+
+      level = LSM::Level.new(3)
+      level.sstables = [sstable, sstable1, sstable2]
+
+      entries = tree.send(:merge_sstables, level)
+      expect(entries.map(&:key)).to eq [1, 2, 3, 4, 5, 6, 7, 8, 9]
+      expect(entries.map(&:val)).to eq ["10", "200", "3", "400", "50", "60", "7", "8", "90"]
     end
 
-    it 'merge 3 lists' do
-      list1 = [LSM::Entry.new(3, '30')]
-      list2 = [LSM::Entry.new(2, '20')]
-      list3 = [LSM::Entry.new(1, '10')]
+    it 'more than one page' do
+      sstable = LSM::SSTable.new
+      sstable.entries << LSM::Entry.new(3, "3")
+      sstable.entries << LSM::Entry.new(7, "7")
+      sstable.entries << LSM::Entry.new(8, "8")
+      sstable.instance_variable_set("@pagesize", 8)
+      sstable.save_to_file
+      expect(sstable.fences.count).to eq 2
 
-      tree = LSM::LSMTree.new
-      entries = tree.send(:merge_entries_list, [list1, list2, list3])
-      expect(entries.count).to eq 3
-      expect(entries[0].val).to eq '10'
-      expect(entries[1].val).to eq '20'
-      expect(entries[2].val).to eq '30'
+      sstable1 = LSM::SSTable.new
+      sstable1.entries << LSM::Entry.new(1, "10")
+      sstable1.save_to_file
+
+      level = LSM::Level.new(2)
+      level.sstables = [sstable, sstable1]
+
+      entries = tree.send(:merge_sstables, level)
+      expect(entries.map(&:key)).to eq [1, 3, 7, 8]
+      expect(entries.map(&:val)).to eq ["10", "3", "7", "8"]
     end
   end
 

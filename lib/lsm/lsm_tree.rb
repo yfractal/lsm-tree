@@ -62,26 +62,58 @@ module LSM
 
       merge_down(to_level_index, to_level_index + 1) if to_level.full?
 
-      entries = merge_entries_list(from_level.sstables.map { |sstable| sstable.entries})
+      entries = merge_sstables(from_level)
 
       to_level.insert_entries(entries)
 
       from_level.empty
     end
 
-    def merge_entries_list(entries)
-      return entries[0] if entries.count == 1
+    def merge_sstables(level)
+      queue = level.sstables.map { |sstable| LSM::SSTableEntriesIterator.new(sstable) }
+      entries = []
 
-      queues = entries
-      new_queues = []
-
-      while queues.length > 0
-        l1, l2 = queues.shift, queues.shift || []
-        new_entries = merge_two_entries(l1, l2, [])
-        new_queues << new_entries
+      while queue.length > 0
+        queue, entries = merge_sstables_helper(queue, entries)
       end
 
-      merge_entries_list(new_queues)
+      entries
+    end
+
+    def merge_sstables_helper(queue, entries)
+      return queue, entries if queue.empty?
+
+      if queue.length == 1
+        while current = queue[0].current_entry
+          entries << current
+          queue[0].next
+        end
+
+        return [], entries
+      end
+
+      min = nil
+      i = 0
+      while i < queue.length
+        if queue[i].current_entry == nil
+          i += 1
+          next
+        else
+          if min == nil
+            min = queue[i]
+          elsif min.current_entry.key == queue[i].current_entry.key
+            queue[i].next
+          elsif min.current_entry.key > queue[i].current_entry.key
+            min = queue[i]
+          end
+        end
+        i += 1
+      end
+
+      entries << min.current_entry
+      min.next
+
+      return queue.filter { |iterator| iterator.current_entry }, entries
     end
 
     def merge_two_entries(l1, l2, r)

@@ -4,7 +4,7 @@ module LSM
   class Helper
     class << self
       def system_pagesize
-        @pagesize ||= `pagesize`.to_i
+        @system_pagesize ||= `pagesize`.to_i
       end
 
       def mktemp(pattern)

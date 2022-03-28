@@ -92,7 +92,8 @@ RSpec.describe LSM::MemTable do
         mem_table.put(i, i * 10)
       end
 
-      expect(mem_table.entries.map(&:val)).to eq (0..999).to_a.map { |i| i * 10 }
+      result = (0..999).to_a.map { |i| i * 10 }
+      expect(mem_table.entries.map(&:val)).to eq result
     end
   end
 end

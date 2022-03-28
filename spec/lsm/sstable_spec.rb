@@ -20,7 +20,7 @@ RSpec.describe LSM::SSTable do
 
       sstable.send(:write_entries_to_file, entries)
       raw = sstable.send(:read_from_file, 0)
-      expect(raw).to eq ["1"] * (`pagesize`.to_i / 4) * 2
+      expect(raw).to eq ['1'] * (`pagesize`.to_i / 4) * 2
     end
 
     it 'more than one page' do
@@ -33,26 +33,28 @@ RSpec.describe LSM::SSTable do
       entries << LSM::Entry.new(2, 2)
       sstable.send(:write_entries_to_file, entries)
       first_raw = sstable.send(:read_from_file, 0)
-      expect(first_raw).to eq ["1"] * (`pagesize`.to_i / 4) * 2
+      expect(first_raw).to eq ['1'] * (`pagesize`.to_i / 4) * 2
 
       second_raw = sstable.send(:read_from_file, 1)
-      expect(second_raw).to eq ["2", "2"]
+      expect(second_raw).to eq %w[2 2]
     end
 
     it 'more test' do
       expect(LSM::Helper).to receive(:system_pagesize).and_return(10)
-      entries = (0..5).map { |i| LSM::Entry.new(i, i)}
+      entries = (0..5).map { |i| LSM::Entry.new(i, i) }
       sstable.send(:write_entries_to_file, entries)
       entries = sstable.read_all_to_entries
-      expect(entries.map(&:val)).to eq (0..5).to_a.map { |i| i.to_s }
+      result = (0..5).to_a.map { |i| i.to_s }
+      expect(entries.map(&:val)).to eq result
     end
 
     it 'more test' do
       expect(LSM::Helper).to receive(:system_pagesize).and_return(8)
-      entries = (0..99).map { |i| LSM::Entry.new(i, i)}
+      entries = (0..99).map { |i| LSM::Entry.new(i, i) }
       sstable.send(:write_entries_to_file, entries)
       entries = sstable.read_all_to_entries
-      expect(entries.map(&:val)).to eq (0..99).to_a.map { |i| i.to_s }
+      result = (0..99).to_a.map { |i| i.to_s }
+      expect(entries.map(&:val)).to eq result
     end
   end
 
@@ -60,7 +62,7 @@ RSpec.describe LSM::SSTable do
     let(:sstable) { LSM::SSTable.new }
 
     it 'set fences' do
-      sstable.instance_variable_set("@pagesize", 12)
+      sstable.instance_variable_set('@pagesize', 12)
       entries = []
 
       9.times do |i|
@@ -74,7 +76,7 @@ RSpec.describe LSM::SSTable do
     end
 
     it 'set fences' do
-      sstable.instance_variable_set("@pagesize", 8)
+      sstable.instance_variable_set('@pagesize', 8)
       entries = []
 
       5.times do |i|
@@ -90,7 +92,7 @@ RSpec.describe LSM::SSTable do
     describe 'query through fences' do
       before do
         @sstable = LSM::SSTable.new
-        @sstable.instance_variable_set("@pagesize", 12)
+        @sstable.instance_variable_set('@pagesize', 12)
 
         entries = []
 
@@ -104,10 +106,10 @@ RSpec.describe LSM::SSTable do
 
       it 'happy path' do
         expect(@sstable).to receive(:read_from_file).with(0).and_call_original
-        expect(@sstable.get(0).val).to eq "0"
+        expect(@sstable.get(0).val).to eq '0'
 
         expect(@sstable).to receive(:read_from_file).with(1).and_call_original
-        expect(@sstable.get(3).val).to eq "3"
+        expect(@sstable.get(3).val).to eq '3'
       end
 
       it 'sad path' do

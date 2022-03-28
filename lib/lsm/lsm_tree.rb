@@ -4,7 +4,7 @@ module LSM
   class LSMTree
     attr_reader :mem_table, :levels, :mem_table_max_entries, :depth, :fanout
 
-    def initialize(mem_table_max_entries=5, depth=5, fanout=2)
+    def initialize(mem_table_max_entries = 5, depth = 5, fanout = 2)
       @mem_table_max_entries = mem_table_max_entries
       @depth = depth
       @fanout = fanout
@@ -58,8 +58,10 @@ module LSM
     end
 
     private
+
     def merge_down(from_level_index, to_level_index)
-      from_level, to_level = levels[from_level_index], levels[to_level_index]
+      from_level = levels[from_level_index]
+      to_level = levels[to_level_index]
 
       merge_down(to_level_index, to_level_index + 1) if to_level.full?
 
@@ -74,9 +76,7 @@ module LSM
       queue = level.sstables.map { |sstable| LSM::SSTableEntriesIterator.new(sstable) }
       entries = []
 
-      while queue.length > 0
-        queue, entries = merge_sstables_helper(queue, entries)
-      end
+      queue, entries = merge_sstables_helper(queue, entries) while queue.length > 0
 
       entries
     end
@@ -96,17 +96,15 @@ module LSM
       min = nil
       i = 0
       while i < queue.length
-        if queue[i].current_entry == nil
+        if queue[i].current_entry.nil?
           i += 1
           next
-        else
-          if min == nil
-            min = queue[i]
-          elsif min.current_entry.key == queue[i].current_entry.key
-            queue[i].next
-          elsif min.current_entry.key > queue[i].current_entry.key
-            min = queue[i]
-          end
+        elsif min.nil?
+          min = queue[i]
+        elsif min.current_entry.key == queue[i].current_entry.key
+          queue[i].next
+        elsif min.current_entry.key > queue[i].current_entry.key
+          min = queue[i]
         end
         i += 1
       end
@@ -114,7 +112,7 @@ module LSM
       entries << min.current_entry
       min.next
 
-      return queue.filter { |iterator| iterator.current_entry }, entries
+      [queue.filter { |iterator| iterator.current_entry }, entries]
     end
   end
 end

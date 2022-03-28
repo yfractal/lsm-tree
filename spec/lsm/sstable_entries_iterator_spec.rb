@@ -22,10 +22,10 @@ RSpec.describe LSM::SSTableEntriesIterator do
 
   it 'two pages entries' do
     sstable = LSM::SSTable.new
-    sstable.entries << LSM::Entry.new(3, "3")
-    sstable.entries << LSM::Entry.new(7, "7")
-    sstable.entries << LSM::Entry.new(8, "8")
-    sstable.instance_variable_set("@pagesize", 8)
+    sstable.entries << LSM::Entry.new(3, '3')
+    sstable.entries << LSM::Entry.new(7, '7')
+    sstable.entries << LSM::Entry.new(8, '8')
+    sstable.instance_variable_set('@pagesize', 8)
     sstable.save_to_file
     expect(sstable.fences.count).to eq 2
 

@@ -8,7 +8,8 @@ module LSM
     end
 
     def current_entry
-      return nil if @current_entries[@entries_index] == nil
+      return nil if @current_entries[@entries_index].nil?
+
       key = @current_entries[@entries_index].to_i
       val = @current_entries[@entries_index + 1]
 
@@ -29,6 +30,7 @@ module LSM
     end
 
     private
+
     def read_from_file(fence_index)
       return [] if fence_index >= @sstable.fences.length
 

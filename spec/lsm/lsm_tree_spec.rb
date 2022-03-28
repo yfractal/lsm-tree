@@ -331,4 +331,16 @@ RSpec.describe LSM::LSMTree do
       end
     end
   end
+
+  it 'coverage to_s methods' do
+    expect(LSM::Helper).to receive(:system_pagesize).and_return(15).at_least(1).times
+    tree = LSM::LSMTree.new(10, 2, 5)
+    array = (0...100).to_a.shuffle
+
+    array.each do |i|
+      tree.put(i, i.to_s)
+    end
+
+    expect(tree.to_s).not_to eq ''
+  end
 end

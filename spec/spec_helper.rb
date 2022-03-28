@@ -1,7 +1,10 @@
 # frozen_string_literal: true
+require "simplecov"
+require "byebug"
+
+SimpleCov.start 'rails'
 
 require "lsm"
-require "byebug"
 
 RSpec.configure do |config|
   # Enable flags like --only-failures and --next-failure

@@ -116,36 +116,5 @@ module LSM
 
       return queue.filter { |iterator| iterator.current_entry }, entries
     end
-
-    def merge_two_entries(l1, l2, r)
-      return r if l1 == nil || l2 == nil
-
-      i, j = 0, 0
-      while i < l1.length && j < l2.length
-        if l1[i].key == l2[j].key
-          r << l1[i]
-          i += 1
-          j += 1
-        elsif l1[i].key < l2[j].key
-          r << l1[i]
-          i += 1
-        else
-          r << l2[j]
-          j += 1
-        end
-      end
-
-      while i < l1.length
-        r << l1[i]
-        i += 1
-      end
-
-      while j < l2.length
-        r << l2[j]
-        j += 1
-      end
-
-      r
-    end
   end
 end

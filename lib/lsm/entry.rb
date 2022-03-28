@@ -8,9 +8,5 @@ module LSM
       @key = key
       @val = val
     end
-
-    def <=>(obj)
-      self.key <=> obj.key
-    end
   end
 end

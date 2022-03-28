@@ -16,10 +16,6 @@ module LSM
       @sstables = [sstable] + @sstables
     end
 
-    def insert_sstable(sstable)
-      @sstables = [sstable] + @sstables
-    end
-
     def get(key)
       @sstables.each do |sstable|
         entry = sstable.get(key)
